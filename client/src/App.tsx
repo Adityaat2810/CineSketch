@@ -1,13 +1,19 @@
-import { Button } from "./components/ui/button"
+import { Suspense, lazy } from "react";
+import { Route, Routes } from "react-router-dom"
+import Loader from './components/Loader';
+
+const Home = lazy(() => import("./pages/home"));
+const GameRoom= lazy(()=> import('./pages/gameRoom'))
 
 const App = () => {
+
   return (
-    <div className="text-rose-500">
-      App
-      <Button variant='destructive'>
-        click me 
-      </Button>
-    </div>
+   <Suspense fallback={<Loader/>}>
+    <Routes>
+      <Route path='/' element={<Home />} />
+      <Route path='/game-room' element={<GameRoom />} />
+    </Routes>
+   </Suspense>
   )
 }
 
