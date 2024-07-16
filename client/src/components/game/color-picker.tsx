@@ -28,7 +28,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({ color, setColor }) => 
                 <TooltipTrigger>
                     <Popover>
                         <PopoverTrigger>
-                            <Palette className="text-rose-500 h-9 w-9" />
+                            <Palette className="text-rose-500 h-9 w-9 hover:text-rose-800" />
                         </PopoverTrigger>
 
                         <PopoverContent >

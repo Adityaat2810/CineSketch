@@ -16,7 +16,10 @@ export const SizePicker: React.FC<SizePickerProps> = ({ size, setSize }) => {
             <Popover>
                 <PopoverTrigger asChild>
                     <button>
-                        <Brush className="text-zinc-500 h-9 w-9" />
+                        <Brush 
+                            className="h-9 w-9 text-zinc-600 dark:text-zinc-100
+                             hover:text-black dark:hover:text-white transition"
+                         />
                     </button>
                 </PopoverTrigger>
 
