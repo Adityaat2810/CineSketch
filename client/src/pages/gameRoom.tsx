@@ -1,14 +1,25 @@
 import Board from "@/components/Board";
 import { ColorPicker } from "@/components/game/color-picker";
-import React, { useEffect, useRef, useState } from "react";
+import { SizePicker } from "@/components/game/size-picker";
+import { Eraser } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 function GameRoom() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [color, setColor] = useState("#aabbcc");
+  const [size, setSize] = useState(5);
 
-  // to draw 
+  // Function to clear the canvas
+  const clearCanvas = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (ctx) {
+      if(canvas)
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  };
+
   useEffect(() => {
-    // Variables to store drawing state
     let isDrawing = false;
     let lastX = 0;
     let lastY = 0;
@@ -28,6 +39,9 @@ function GameRoom() {
         ctx.moveTo(lastX, lastY);
         ctx.lineTo(e.offsetX, e.offsetY);
         ctx.strokeStyle = color; // Use the selected color
+        ctx.lineWidth = size;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
         ctx.stroke();
         [lastX, lastY] = [e.offsetX, e.offsetY];
       }
@@ -38,13 +52,6 @@ function GameRoom() {
     };
 
     const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-
-    if (ctx) {
-      ctx.lineWidth = 5;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-    }
 
     if (canvas) {
       canvas.addEventListener("mousedown", startDrawing);
@@ -61,16 +68,28 @@ function GameRoom() {
         canvas.removeEventListener("mouseout", endDrawing);
       }
     };
-  }, [color]); // Re-run effect when color changes
+  }, [color, size]);
 
   return (
     <div className="flex flex-col justify-center items-center h-full w-full">
       <div className="mt-10 border-1">
         <Board canvasRef={canvasRef} />
       </div>
-      
-      <div>
-        <ColorPicker color={color} setColor={setColor} />
+
+      <div className="flex justify-center p-2">
+        <div className="px-4">
+          <button onClick={clearCanvas} className="h-9 w-9 text-zinc-500">
+            <Eraser className="h-9 w-9"/>
+          </button>
+        </div>
+
+        <div className="px-2">
+          <SizePicker setSize={setSize} size={size} />
+        </div>
+
+        <div className="px-4">
+          <ColorPicker color={color} setColor={setColor} />
+        </div>
       </div>
     </div>
   );
