@@ -1,9 +1,20 @@
 import express from 'express'
 import { Server } from 'socket.io';
 import {createServer} from 'http'
+import { config } from 'dotenv';
 
 const app = express();
 const server = createServer(app)
+
+// importing routes 
+import userRoutes from './routes/user'
+
+
+config({
+  path: './.env'
+})
+
+//const var = process.env.var || ''
 
 //so it is instance of circuit
 const io = new Server(server, {
@@ -16,6 +27,9 @@ const io = new Server(server, {
 
 const port = 3000 
 
+app.use(express.json())
+
+app.use("/api/v1/user",userRoutes)
 app.get('/',(req,res)=>{
     res.send("hello world!")
 })
