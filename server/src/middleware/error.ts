@@ -1,13 +1,14 @@
-import ErrorHandler from "../lib/errorHandler";
 import express, { NextFunction, Request, Response } from "express"
-import { ControllerType } from "../types/types";
+import ErrorHandler from "../lib/errorHandler.js";
+import { ControllerType } from "../types/types.js";
 
-export const errorMiddleware=(
+export const errorMiddleware =(
     err:ErrorHandler,
     req:Request,
     res:Response,
     next:NextFunction
 )=>{
+
     err.message ||="Internal server error";
     err.statusCode ||=  500;
 
@@ -22,8 +23,8 @@ export const errorMiddleware=(
 
 // wrapper type 
 
-export const TryCatch = (func:ControllerType)=>{
-    (req: Request, res: Response, next: NextFunction) => {
-        return Promise.resolve(func(req, res, next)).catch(next);
-}
-}
+export const TryCatch =
+  (func: ControllerType) =>
+  (req: Request, res: Response, next: NextFunction) => {
+    return Promise.resolve(func(req, res, next)).catch(next);
+};
