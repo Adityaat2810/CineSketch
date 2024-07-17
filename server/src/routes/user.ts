@@ -1,9 +1,8 @@
 import express, { Request, Response } from 'express'
+import { Signup } from '../controller/user'
 const router= express.Router()
 
-router.get('/',(req:Request,res:Response)=>{
-    res.send("user routes working")
-})
+router.post('/signup',()=>{})
 
 export default router
 
