@@ -4,11 +4,13 @@ import { createServer } from 'http';
 import { config } from 'dotenv';
 import userRoutes from './routes/user.js';
 import { errorMiddleware } from './middleware/error.js';
+import cors from "cors"
 
 config({ path: './.env' });
 
 const app = express();
 const server = createServer(app);
+app.use(cors());
 
 // CORS configuration
 const io = new Server(server, {

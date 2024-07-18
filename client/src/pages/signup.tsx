@@ -1,6 +1,11 @@
 import { SignupForm } from "@/components/authentication/signup-form"
+import { useNavigate } from "react-router-dom"
 
 function Signup() {
+  const navigate = useNavigate()
+  const onClick =()=>{
+    navigate('/signin')
+  }
   return (
     <div>
       <div className="flex justify-center h-screen 
@@ -16,7 +21,7 @@ function Signup() {
         <div className="flex items-center justify-center 
           mt-5 text-black dark:text-white">
           Already have account ?
-           <button  className="mx-5 text-blue-600 " >
+           <button onClick={onClick}  className="mx-5 text-blue-600 " >
               SignIn
            </button>
         </div>

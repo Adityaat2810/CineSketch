@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form"
 import {SignUpInput, signUpInput, } from '@adityaat2810/cine-draw'
 import { Button } from "@/components/ui/button"
+import axios from 'axios'
 import {
   Form,
   FormControl,
@@ -11,9 +12,12 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useNavigate } from "react-router-dom"
 
 export const SignupForm=()=>{
     // defining form 
+    const navigate = useNavigate();
+
     const form = useForm<SignUpInput>({
       resolver: zodResolver(signUpInput),
         defaultValues: {
@@ -25,7 +29,7 @@ export const SignupForm=()=>{
 
       });
 
-      function onSubmit(values: SignUpInput) {
+      async function onSubmit(values: SignUpInput) {
         // Do something with the form values.
         // ✅ This will be type-safe and validated.
          values.avatarUrl='ddefdc'
@@ -34,7 +38,24 @@ export const SignupForm=()=>{
          ){
           alert('PLease fill all details')
          }
-         console.log(values)
+         try {
+          const res = await axios.post('http://localhost:3000/api/v1/user/signup', values);
+          if (res.data.success) {
+            // Clear form data
+            form.reset({
+              username: "",
+              passwordHash: "",
+              email: "",
+              avatarUrl: ""
+            });
+            // Navigate to sign-in page
+            navigate('/signin');
+          }
+        } catch (error) {
+          console.error('Signup error:', error);
+          // Handle error accordingly
+        }      
+         
          
       }
 

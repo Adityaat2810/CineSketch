@@ -11,9 +11,12 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { zodResolver } from "@hookform/resolvers/zod"
+import axios from "axios"
+import { useNavigate } from "react-router-dom"
 
 export const SignInForm=()=>{
-    // defining form 
+    const navigate = useNavigate();
+     // defining form 
     const form = useForm<SignInInput>({
       resolver: zodResolver(signInInput),
         defaultValues: {
@@ -23,7 +26,7 @@ export const SignInForm=()=>{
 
       });
 
-      function onSubmit(values: SignInInput) {
+      async function onSubmit(values: SignInInput) {
         // Do something with the form values.
         // ✅ This will be type-safe and validated.
          
@@ -31,7 +34,22 @@ export const SignInForm=()=>{
          ){
           alert('PLease fill all details')
          }
-         console.log(values)
+
+         try {
+          const res = await axios.post('http://localhost:3000/api/v1/user/signin', values);
+          if (res.data.success) {
+            // Save token to local storage or session storage
+            localStorage.setItem('authentication-token', res.data.token);
+            console.log(res.data.token)
+            // Navigate to desired page
+            navigate('/'); // Change '/dashboard' to your desired route
+          }
+        } catch (error) {
+          console.error('Sign-in error:', error);
+          // Handle error accordingly
+        }
+
+         
          
       }
 
