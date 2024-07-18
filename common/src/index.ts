@@ -14,6 +14,7 @@ export const signInInput = z.object({
 
 
 
+
 // type inference in zod 
 // frontend will need it 
 export type SignUpInput = z.infer<typeof signUpInput>

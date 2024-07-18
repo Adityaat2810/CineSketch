@@ -3,6 +3,7 @@ import { Server } from 'socket.io';
 import { createServer } from 'http';
 import { config } from 'dotenv';
 import userRoutes from './routes/user.js';
+import roomRoutes from './routes/room.js'
 import { errorMiddleware } from './middleware/error.js';
 import cors from "cors"
 
@@ -25,6 +26,8 @@ const port = 3000;
 
 app.use(express.json());
 app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/room", roomRoutes);
+
 
 app.get('/', (req, res) => {
     res.send("hello world!");
