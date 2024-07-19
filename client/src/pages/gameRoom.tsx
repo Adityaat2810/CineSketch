@@ -3,26 +3,23 @@ import { ColorPicker } from "@/components/game/color-picker";
 import { SizePicker } from "@/components/game/size-picker";
 import { Eraser } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:3000"); // Adjust the server URL as needed
+const socket = io("http://localhost:3000");
 
-function GameRoom() {
+const GameRoom = () => {
+  const { roomId } = useParams<{ roomId: string }>();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [color, setColor] = useState("#aabbcc");
   const [size, setSize] = useState(5);
 
-  // Function to clear the canvas
-  const clearCanvas = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (ctx) {
-      if(canvas)
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
-  };
-
   useEffect(() => {
+    if (!roomId) return;
+
+    // Join the room
+    socket.emit("join-room", roomId);
+
     let isDrawing = false;
     let lastX = 0;
     let lastY = 0;
@@ -49,7 +46,7 @@ function GameRoom() {
         [lastX, lastY] = [e.offsetX, e.offsetY];
 
         // Emit drawing data to the server
-        socket.emit("canvasImage", canvas?.toDataURL());
+        socket.emit("canvasImage", { roomId, canvasData: canvas?.toDataURL() });
       }
     };
 
@@ -77,6 +74,13 @@ function GameRoom() {
       };
     });
 
+    socket.on("clearCanvas", () => {
+      const ctx = canvas?.getContext("2d");
+      if (ctx && canvas) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    });
+
     return () => {
       if (canvas) {
         canvas.removeEventListener("mousedown", startDrawing);
@@ -84,8 +88,22 @@ function GameRoom() {
         canvas.removeEventListener("mouseup", endDrawing);
         canvas.removeEventListener("mouseout", endDrawing);
       }
+      socket.off("canvasImage");
+      socket.off("clearCanvas");
+      socket.emit("leave-room", roomId); // Leave the room when component unmounts
     };
-  }, [color, size]);
+  }, [color, size, roomId]);
+
+  // Function to clear the canvas
+  const clearCanvas = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (ctx && canvas) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Emit clearCanvas event to the server
+      socket.emit("clearCanvas", roomId);
+    }
+  };
 
   return (
     <div className="flex flex-col justify-center items-center h-full w-full">
@@ -110,6 +128,6 @@ function GameRoom() {
       </div>
     </div>
   );
-}
+};
 
 export default GameRoom;

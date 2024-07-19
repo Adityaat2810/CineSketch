@@ -2,7 +2,7 @@ import React, { Suspense, lazy } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import Loader from './components/Loader';
 import Header from "./components/Header";
-import ProtectedRoute from "./components/authentication/protect-route"; // Import the ProtectedRoute component
+import ProtectedRoute from "./components/authentication/protect-route";
 
 const Home = lazy(() => import("./pages/home"));
 const GameRoom = lazy(() => import('./pages/gameRoom'));
@@ -17,9 +17,9 @@ const App = () => {
     <Suspense fallback={<Loader />}>
       {!noHeaderRoutes.includes(location.pathname) && <Header />}
       <Routes>
-        <Route element={<ProtectedRoute />}> {/* Wrap protected routes */}
+        <Route element={<ProtectedRoute />}>
           <Route path='/' element={<Home />} />
-          <Route path='/game-room' element={<GameRoom />} />
+          <Route path='/game-room/:roomId' element={<GameRoom />} />
         </Route>
         <Route path='/signup' element={<SignUp />} />
         <Route path='/signin' element={<SignIn />} />
