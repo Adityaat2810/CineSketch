@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Input } from "@/components/ui/input";
 import getProfile from "@/lib/getProfile";
@@ -10,13 +10,21 @@ const Home = () => {
   const [rooms, setRooms] = useState<any[]>([]);
   const [roomName, setRoomName] = useState<string>("");
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const response = await getProfile();
-        setProfile(response.data);
+        if (response) setProfile(response.data);
+
+        if (!response.data) {
+          navigate('/signin')
+        }
+
         console.log(response);
       } catch (error) {
+        console.log(error)
         console.error("Error fetching profile:", error);
       }
     };
@@ -62,9 +70,10 @@ const Home = () => {
   };
 
   return (
-    <div >
-      <div className="mt-5 py-3 ">
-        <div className="w-[300px]">
+    <div className="flex justify-around">
+      <div className="mt-5 p-3  items-center bg-zinc-100 dark:bg-gray-800 rounded-md">
+        <p className="mt-3 ">Create a new Room</p>
+        <div className="w-[300px] mt-3">
           <Input
 
             type="text"
@@ -73,21 +82,34 @@ const Home = () => {
             onChange={handleInputChange}
           />
         </div>
-        
-        <Button
-         className="mt-3"
-         onClick={handleCreateRoom}>Create Room</Button>
+        <div className="flex justify-center ">
+          <Button
+
+            className="mt-10 items-center w-full "
+            onClick={handleCreateRoom}>Create Room</Button>
+
+        </div>
+
+
+
       </div>
-      <div>
-        <h2>Your Rooms</h2>
-        <ul>
-          {rooms.map((room) => (
-            <li key={room.id}>
-              <Link to={`/game-room/${room.id}`}>{room.name}</Link>
-            </li>
-          ))}
-        </ul>
+      <div className="bg-slate-100 dark:bg-gray-800 mt-5 rounded-md">
+        <div>
+          <p className="px-10 text-xl mt-3">
+            Your Rooms
+          </p>
+          <ul className="mt-3 px-3">
+            {rooms.map((room) => (
+              <li key={room.id}>
+                <div className="text-blue-500">
+                <Link to={`/game-room/${room.id}`}>{room.name}</Link>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
+
     </div>
   );
 };

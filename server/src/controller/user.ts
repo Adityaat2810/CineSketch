@@ -89,6 +89,8 @@ export const getUserDetails = TryCatch(
             return next(new ErrorHandler('Invalid token', 401));
         }
 
+        console.log(' i am here ')
+
         const { email } = decoded as JwtPayload;
         const user = await prisma.user.findFirst({
             where: {
