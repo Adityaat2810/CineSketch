@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Input } from "@/components/ui/input";
 import getProfile from "@/lib/getProfile";
+import { InvitePeople } from "@/components/game/invite-people";
 
 const Home = () => {
   const [profile, setProfile] = useState<any>(null);
@@ -93,17 +94,23 @@ const Home = () => {
 
 
       </div>
+
+      <div>
+        
+      </div>
       <div className="bg-slate-100 dark:bg-gray-800 mt-5 rounded-md">
         <div>
           <p className="px-10 text-xl mt-3">
             Your Rooms
           </p>
           <ul className="mt-3 px-3">
-            {rooms.map((room) => (
-              <li key={room.id}>
-                <div className="text-blue-500">
-                <Link to={`/game-room/${room.id}`}>{room.name}</Link>
-                </div>
+          {rooms.map((room) => (
+              <li key={room.id} className="flex justify-between items-center p-2">
+                <Link to={`/game-room/${room.id}`} className="text-blue-500">
+                  {room.name}
+                </Link>
+                <InvitePeople 
+                  roomId={room.id} />
               </li>
             ))}
           </ul>

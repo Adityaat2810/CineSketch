@@ -23,9 +23,9 @@ interface ColorPickerProps {
 export const ColorPicker: React.FC<ColorPickerProps> = ({ color, setColor }) => {
     return (
 
-        <TooltipProvider>
-            <Tooltip>
-                <TooltipTrigger>
+        <TooltipProvider >
+            <Tooltip >
+                <TooltipTrigger >
                     <Popover>
                         <PopoverTrigger>
                             <Palette className="text-rose-500 h-9 w-9 hover:text-rose-800" />
