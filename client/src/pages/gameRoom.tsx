@@ -3,18 +3,51 @@ import { ColorPicker } from "@/components/game/color-picker";
 import { SizePicker } from "@/components/game/size-picker";
 import { Eraser } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { io } from "socket.io-client";
+import axios from "axios";
 
 const socket = io("http://localhost:3000");
 
 const GameRoom = () => {
   const { roomId } = useParams<{ roomId: string }>();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [color, setColor] = useState("#aabbcc");
   const [size, setSize] = useState(5);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    const verifyPlayer = async () => {
+      try {
+        const token = localStorage.getItem("authentication-token");
+        if (!token) {
+          navigate("/sign-in");
+          return;
+        }
+
+        const response = await axios.post("http://localhost:3000/api/v1/player/verify", {
+          token,
+          roomId,
+        });
+
+        if (!response.data.success) {
+          navigate("/");
+        } else {
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error("Error verifying player:", error);
+        navigate("/");
+      }
+    };
+
+    verifyPlayer();
+  }, [navigate, roomId]);
+
+  useEffect(() => {
+    if (isLoading) return;
+
     if (!roomId) return;
 
     // Join the room
@@ -92,36 +125,35 @@ const GameRoom = () => {
       socket.off("clearCanvas");
       socket.emit("leave-room", roomId); // Leave the room when component unmounts
     };
-  }, [color, size, roomId]);
+  }, [color, size, roomId, isLoading]);
 
-  // Function to clear the canvas
   const clearCanvas = () => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (ctx && canvas) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // Emit clearCanvas event to the server
       socket.emit("clearCanvas", roomId);
     }
   };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="flex flex-col justify-center items-center h-full w-full">
       <div className="mt-10 border-1">
         <Board canvasRef={canvasRef} />
       </div>
-
       <div className="flex justify-center p-2">
         <div className="px-4">
           <button onClick={clearCanvas} className="h-9 w-9 text-zinc-500">
             <Eraser className="h-9 w-9 text-zinc-600 dark:text-zinc-100 hover:text-black dark:hover:text-white transition" />
           </button>
         </div>
-
         <div className="px-2">
           <SizePicker setSize={setSize} size={size} />
         </div>
-
         <div className="px-4">
           <ColorPicker color={color} setColor={setColor} />
         </div>

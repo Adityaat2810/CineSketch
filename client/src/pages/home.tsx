@@ -70,8 +70,16 @@ const Home = () => {
         ownerId: profile.id,
         name: roomName,
       });
+      // when user create room he should also become player 
       const newRoom = response.data.data;
-      console.log(newRoom);
+
+      //creating user as player 
+      const userPlayer = await axios.post("http://localhost:3000/api/v1/player",{
+        userId:profile?.id,
+        gameRoomId:newRoom?.id
+      })
+      console.log('user become player of room',userPlayer)
+
       setRooms([...rooms, newRoom]);
       setRoomName(""); // Clear input field after room creation
     } catch (error) {
@@ -113,7 +121,7 @@ const Home = () => {
 
       <div className="bg-slate-100 dark:bg-gray-800 mt-5 rounded-md
       border border-zinc-500">
-        <div>test
+        <div>
           <p className="px-10 text-xl mt-3">Your Rooms</p>
           <ul className="mt-3 px-3">
             {rooms.map((room) => (

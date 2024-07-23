@@ -2,12 +2,13 @@ import { ModeToggle } from "./mode-toogel"
 
 function Header() {
   return (
-    <div className="bg-slate-200 dark:bg-slate-800 h-[70px] flex justify-evenly">
+    <div className="bg-slate-200 dark:bg-slate-800 h-[70px] flex 
+    justify-end pr-2 pt-2">
         <div>
-            Header
+            
         </div>
-        <div>
-            <ModeToggle/>
+        <div >
+            <ModeToggle />
         </div>
     </div>
   )
