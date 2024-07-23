@@ -4,6 +4,7 @@ import { createServer } from 'http';
 import { config } from 'dotenv';
 import userRoutes from './routes/user.js';
 import roomRoutes from './routes/room.js'
+import playerRoutes from './routes/player.js'
 import { errorMiddleware } from './middleware/error.js';
 import cors from 'cors';
 
@@ -27,6 +28,8 @@ const port = 3000;
 app.use(express.json());
 app.use('/api/v1/user', userRoutes);
 app.use('/api/v1/room', roomRoutes);
+app.use('/api/v1/player', playerRoutes);
+
 
 app.get('/', (req, res) => {
   res.send('hello world!');

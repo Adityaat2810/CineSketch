@@ -5,6 +5,7 @@ import axios from "axios";
 import { Input } from "@/components/ui/input";
 import getProfile from "@/lib/getProfile";
 import { InvitePeople } from "@/components/game/invite-people";
+import JoinRoom from "@/components/game/join-room";
 
 const Home = () => {
   const [profile, setProfile] = useState<any>(null);
@@ -84,7 +85,8 @@ const Home = () => {
 
   return (
     <div className="flex justify-around">
-      <div className="mt-5 p-3 items-center bg-zinc-100 dark:bg-gray-800 rounded-md">
+      <div className="mt-5 p-3 items-center bg-zinc-100 dark:bg-gray-800 
+      rounded-md border border-zinc-500">
         <p className="mt-3">Create a new Room</p>
         <div className="w-[300px] mt-3">
           <Input
@@ -104,8 +106,12 @@ const Home = () => {
         </div>
       </div>
 
-      <div></div>
-      <div className="bg-slate-100 dark:bg-gray-800 mt-5 rounded-md">
+      <div className="mt-5">
+        <JoinRoom/>
+      </div>
+
+      <div className="bg-slate-100 dark:bg-gray-800 mt-5 rounded-md
+      border border-zinc-500">
         <div>
           <p className="px-10 text-xl mt-3">Your Rooms</p>
           <ul className="mt-3 px-3">
