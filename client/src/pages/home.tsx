@@ -4,8 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Input } from "@/components/ui/input";
 import getProfile from "@/lib/getProfile";
-import { InvitePeople } from "@/components/game/invite-people";
-import JoinRoom from "@/components/game/join-room";
+import { InvitePeople } from "@/components/game/invite-people.js";
+import JoinRoom from "@/components/game/join-room.js";
 
 const Home = () => {
   const [profile, setProfile] = useState<any>(null);
@@ -84,6 +84,7 @@ const Home = () => {
   };
 
   return (
+    
     <div className="flex justify-around">
       <div className="mt-5 p-3 items-center bg-zinc-100 dark:bg-gray-800 
       rounded-md border border-zinc-500">
@@ -106,13 +107,13 @@ const Home = () => {
         </div>
       </div>
 
-      <div className="mt-5">
-        <JoinRoom userId={profile.id}/>
-      </div>
+     {profile?.id && (<div className="mt-5"> 
+        <JoinRoom userId={profile?.id}/>
+     </div>)}
 
       <div className="bg-slate-100 dark:bg-gray-800 mt-5 rounded-md
       border border-zinc-500">
-        <div>
+        <div>test
           <p className="px-10 text-xl mt-3">Your Rooms</p>
           <ul className="mt-3 px-3">
             {rooms.map((room) => (

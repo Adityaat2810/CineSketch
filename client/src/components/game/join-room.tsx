@@ -12,7 +12,7 @@ function JoinRoom({ userId }: JoinRoomProps) {
 
   const handleJoinRoom = async () => {
     try {
-      const response = await axios.post('http://localhost:3000/api/v1/player/', {
+      const response = await axios.post('http://localhost:3000/api/v1/player/join', {
         userId,
         gameRoomId: roomId,
       });
