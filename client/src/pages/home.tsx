@@ -107,7 +107,7 @@ const Home = () => {
       </div>
 
       <div className="mt-5">
-        <JoinRoom/>
+        <JoinRoom userId={profile.id}/>
       </div>
 
       <div className="bg-slate-100 dark:bg-gray-800 mt-5 rounded-md
