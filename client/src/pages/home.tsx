@@ -16,22 +16,34 @@ const Home = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await getProfile();
-        if (response) setProfile(response.data);
+        const token = localStorage.getItem('authentication-token');
+        if (!token) {
+          navigate('/signin');
+          return; // Early return if no token
+        }
 
+        const response = await getProfile();
+
+        if (!response || response.success === false) {
+          navigate('/signin');
+          return; // Early return if profile fetching fails
+        }
+
+        setProfile(response.data);
         if (!response.data) {
-          navigate('/signin')
+          navigate('/signin');
         }
 
         console.log(response);
       } catch (error) {
-        console.log(error)
+        console.log(error);
         console.error("Error fetching profile:", error);
+        navigate('/signin'); // Navigate on error
       }
     };
 
     fetchProfile();
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     if (profile?.id) {
@@ -72,51 +84,42 @@ const Home = () => {
 
   return (
     <div className="flex justify-around">
-      <div className="mt-5 p-3  items-center bg-zinc-100 dark:bg-gray-800 rounded-md">
-        <p className="mt-3 ">Create a new Room</p>
+      <div className="mt-5 p-3 items-center bg-zinc-100 dark:bg-gray-800 rounded-md">
+        <p className="mt-3">Create a new Room</p>
         <div className="w-[300px] mt-3">
           <Input
-
             type="text"
             placeholder="Enter room name"
             value={roomName}
             onChange={handleInputChange}
           />
         </div>
-        <div className="flex justify-center ">
+        <div className="flex justify-center">
           <Button
-
-            className="mt-10 items-center w-full "
-            onClick={handleCreateRoom}>Create Room</Button>
-
+            className="mt-10 items-center w-full"
+            onClick={handleCreateRoom}
+          >
+            Create Room
+          </Button>
         </div>
-
-
-
       </div>
 
-      <div>
-        
-      </div>
+      <div></div>
       <div className="bg-slate-100 dark:bg-gray-800 mt-5 rounded-md">
         <div>
-          <p className="px-10 text-xl mt-3">
-            Your Rooms
-          </p>
+          <p className="px-10 text-xl mt-3">Your Rooms</p>
           <ul className="mt-3 px-3">
-          {rooms.map((room) => (
+            {rooms.map((room) => (
               <li key={room.id} className="flex justify-between items-center p-2">
                 <Link to={`/game-room/${room.id}`} className="text-blue-500">
                   {room.name}
                 </Link>
-                <InvitePeople 
-                  roomId={room.id} />
+                <InvitePeople roomId={room.id} />
               </li>
             ))}
           </ul>
         </div>
       </div>
-
     </div>
   );
 };
