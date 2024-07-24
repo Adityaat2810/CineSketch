@@ -6,6 +6,8 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { io } from "socket.io-client";
 import axios from "axios";
+import Chat from "@/components/game/chat";
+import getProfile from "@/lib/getProfile";
 
 const socket = io("http://localhost:3000");
 
@@ -15,7 +17,41 @@ const GameRoom = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [color, setColor] = useState("#aabbcc");
   const [size, setSize] = useState(5);
+  const [profile, setProfile] = useState<any>(null);
   const navigate = useNavigate();
+
+   useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem('authentication-token');
+        if (!token) {
+          navigate('/signin');
+          return; // Early return if no token
+        }
+
+        const response = await getProfile();
+
+        if (!response || response.success === false) {
+          navigate('/signin');
+          return; // Early return if profile fetching fails
+        }
+
+        setProfile(response.data);
+        if (!response.data) {
+          navigate('/signin');
+        }
+
+        console.log(response);
+      } catch (error) {
+        console.log(error);
+        console.error("Error fetching profile:", error);
+        navigate('/signin'); // Navigate on error
+      }
+    };
+
+    fetchProfile();
+  }, [navigate]);
+
 
   useEffect(() => {
     const verifyPlayer = async () => {
@@ -142,9 +178,12 @@ const GameRoom = () => {
 
   return (
     <div className="flex flex-col justify-center items-center h-full w-full">
-      <div className="mt-10 border-1">
+      <div className="mt-10 border-1 flex">
         <Board canvasRef={canvasRef} />
+
+        <Chat userId={profile?.username} roomId={roomId as string }/>
       </div>
+
       <div className="flex justify-center p-2">
         <div className="px-4">
           <button onClick={clearCanvas} className="h-9 w-9 text-zinc-500">
