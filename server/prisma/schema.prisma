@@ -34,8 +34,11 @@ model GameRoom {
   status    StatusType @default(ACTIVE) // e.g., "active", "completed"
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
+  
   players   Player[]
   guesses   Guess[]
+  usedMovies GameMovie[]
+
 
   @@index([ownerId])
 }
@@ -62,4 +65,35 @@ model Guess {
 
   @@index([userId])
   @@index([gameRoomId])
+}
+
+model Movie {
+  id          String   @id @default(uuid())
+  title       String   @unique
+  releaseYear Int
+  genre       String[]
+  director    String
+  difficulty  Difficulty
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  usedInGames GameMovie[]
+}
+
+model GameMovie {
+  id        String   @id @default(uuid())
+  movieId   String
+  gameRoomId String
+  movie     Movie    @relation(fields: [movieId], references: [id])
+  gameRoom  GameRoom @relation(fields: [gameRoomId], references: [id])
+  usedAt    DateTime @default(now())
+  wasGuessed Boolean @default(false)
+
+  @@unique([movieId, gameRoomId])
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
 }
