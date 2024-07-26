@@ -2,13 +2,15 @@ import express from 'express';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
 import { config } from 'dotenv';
+import { errorMiddleware } from './middleware/error.js';
+import cors from 'cors';
+import { PrismaClient } from '@prisma/client';
+
 import userRoutes from './routes/user.js';
 import roomRoutes from './routes/room.js';
 import playerRoutes from './routes/player.js';
 import guesRoutes from './routes/guess.js'
-import { errorMiddleware } from './middleware/error.js';
-import cors from 'cors';
-import { PrismaClient } from '@prisma/client';
+import moviesRoutes from './routes/movies.js'
 
 config({ path: './.env' });
 
@@ -22,6 +24,8 @@ app.use('/api/v1/user', userRoutes);
 app.use('/api/v1/room', roomRoutes);
 app.use('/api/v1/player', playerRoutes);
 app.use('/api/v1/guess', guesRoutes);
+app.use('/api/v1/movies', moviesRoutes);
+
 
 
 app.get('/', (req, res) => {
