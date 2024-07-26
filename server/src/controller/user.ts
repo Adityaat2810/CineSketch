@@ -109,3 +109,27 @@ export const getUserDetails = TryCatch(
 
     }
 );
+
+export const getUserById= TryCatch(
+    async(req,res,next)=>{
+
+
+        const {userId}=req.body 
+        console.log(req.body)
+        if(!userId){
+            return next(new ErrorHandler('Id toh dede kutte ',404))
+        }
+
+
+        const user = prisma.user.findFirst({
+            where:{
+                id:userId
+            }
+        })
+
+        return res.status(200).json({
+            data:user ,
+            success:true 
+        })
+    }
+)

@@ -5,11 +5,14 @@ import { config } from 'dotenv';
 import userRoutes from './routes/user.js';
 import roomRoutes from './routes/room.js';
 import playerRoutes from './routes/player.js';
+import guesRoutes from './routes/guess.js'
 import { errorMiddleware } from './middleware/error.js';
 import cors from 'cors';
+import { PrismaClient } from '@prisma/client';
 
 config({ path: './.env' });
 
+const prisma = new PrismaClient()
 const app = express();
 const server = createServer(app);
 
@@ -18,6 +21,8 @@ app.use(express.json());
 app.use('/api/v1/user', userRoutes);
 app.use('/api/v1/room', roomRoutes);
 app.use('/api/v1/player', playerRoutes);
+app.use('/api/v1/guess', guesRoutes);
+
 
 app.get('/', (req, res) => {
   res.send('Hello world!');
@@ -53,11 +58,46 @@ io.on('connection', (socket) => {
     socket.to(roomId).emit('canvasImage', canvasData);
   });
 
-  socket.on('chatMessage', (data) => {
+  socket.on('chatMessage', async (data) => {
     const { roomId, message, userId } = data;
-    io.to(roomId).emit('chatMessage', { message, userId });
-  });
 
+    try {
+      // Validate userId
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        console.error('Invalid userId');
+        return;
+      }
+
+      // Validate gameRoomId
+      const gameRoom = await prisma.gameRoom.findUnique({
+        where: { id: roomId },
+      });
+
+      if (!gameRoom) {
+        console.error('Invalid gameRoomId');
+        return;
+      }
+
+      // Save the message to the database
+      const savedGuess = await prisma.guess.create({
+        data: {
+          content: message,
+          userId,
+          gameRoomId: roomId,
+        },
+      });
+
+      // Emit the message to all clients in the room
+      // Change this line to emit the saved guess object
+      io.to(roomId).emit('chatMessage', savedGuess);
+    } catch (error) {
+      console.error('Error saving message:', error);
+    }
+  });
   socket.on('clearCanvas', (roomId) => {
     // Broadcast the clearCanvas event to all other clients in the same room
     socket.to(roomId).emit('clearCanvas');

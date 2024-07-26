@@ -181,7 +181,7 @@ const GameRoom = () => {
       <div className="mt-10 border-1 flex">
         <Board canvasRef={canvasRef} />
 
-        <Chat userId={profile?.username} roomId={roomId as string }/>
+        <Chat userName={profile?.username} userId={profile?.id} roomId={roomId as string }/>
       </div>
 
       <div className="flex justify-center p-2">
