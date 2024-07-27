@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import ErrorHandler from "../lib/errorHandler.js";
 import { TryCatch } from "../middleware/error.js";
+import { CLIENT_RENEG_LIMIT } from "tls";
 
 const prisma = new PrismaClient();
 
@@ -40,6 +41,46 @@ export const getUserRoom = TryCatch(async (req, res, next) => {
 
   return res.status(200).json({
     data: rooms,
+    success: true
+  });
+});
+
+export const getRoomPlayers = TryCatch(async (req, res, next) => {
+  const { roomId } = req.params;
+
+  if (!roomId) {
+    return next(new ErrorHandler("Room id missing", 404));
+  }
+
+  const players = await prisma.player.findMany({
+    where: { gameRoomId: roomId },
+    include: {
+      user: {
+        select: {
+          id: true,
+          username: true,
+          avatarUrl: true
+        }
+      }
+    }
+  });
+
+  if (!players) {
+    return next(new ErrorHandler("No players found for this room", 404));
+  }
+
+  const playersData = players.map(player => ({
+    id: player.id,
+    userId: player.userId,
+    username: player.user.username,
+    avatarUrl: player.user.avatarUrl,
+    joinedAt: player.joinedAt
+  }));
+
+  console.log(playersData)
+
+  return res.status(200).json({
+    data: playersData,
     success: true
   });
 });

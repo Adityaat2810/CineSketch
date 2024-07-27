@@ -15,28 +15,41 @@ interface ChatInterface {
 interface Message {
   content: string;
   userId: string;
+  userName?: string;
+}
 
+interface Player {
+  id: string;
+  userId: string;
+  username: string;
+  avatarUrl: string | null;
+  joinedAt: string;
 }
 
 const Chat = ({ roomId, userId, userName }: ChatInterface) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [message, setMessage] = useState("");
-
+  const [players, setPlayers] = useState<Player[]>([]);
 
   useEffect(() => {
     socket.emit("join-room", roomId);
 
-    const fetchMessages = async () => {
+    const fetchMessagesAndPlayers = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/v1/guess/${roomId}`);
-        setMessages(response.data.data);
-        console.log('messages from db call', response.data.data)
+        const [messagesResponse, playersResponse] = await Promise.all([
+          axios.get(`http://localhost:3000/api/v1/guess/${roomId}`),
+          axios.get(`http://localhost:3000/api/v1/room/players/${roomId}`)
+        ]);
+        setMessages(messagesResponse.data.data);
+        setPlayers(playersResponse.data.data);
+        console.log('messages from db call', messagesResponse.data.data);
+        console.log('players in room', playersResponse.data.data);
       } catch (error) {
-        console.error('Error fetching messages:', error);
+        console.error('Error fetching data:', error);
       }
     };
 
-    fetchMessages();
+    fetchMessagesAndPlayers();
 
     socket.on("chatMessage", (data) => {
       setMessages((prevMessages) => [...prevMessages, data]);
@@ -49,9 +62,15 @@ const Chat = ({ roomId, userId, userName }: ChatInterface) => {
 
   const sendMessage = () => {
     if (message.trim()) {
-      socket.emit("chatMessage", { roomId, message, userId });
+      socket.emit("chatMessage", { roomId, message, userId, userName });
       setMessage("");
     }
+  };
+
+  const getPlayerName = (userId: string) => {
+    const player = players.find(p => p.userId === userId);
+    console.log('player is ', player);
+    return player?.username || 'Unknown User';
   };
 
   return (
@@ -59,7 +78,7 @@ const Chat = ({ roomId, userId, userName }: ChatInterface) => {
       <div className="chat-messages text-zinc-500">
         {messages.map((msg, index) => (
           <div key={index}>
-            <strong>{msg.userId}:</strong> {msg.content}
+            <strong>{getPlayerName(msg.userId)}:</strong> {msg.content}
           </div>
         ))}
       </div>
