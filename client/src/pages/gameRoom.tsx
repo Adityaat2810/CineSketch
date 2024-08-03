@@ -8,6 +8,7 @@ import { io } from "socket.io-client";
 import axios from "axios";
 import Chat from "@/components/game/chat";
 import getProfile from "@/lib/getProfile";
+import { LeaderBoard } from "@/components/game/leaderBoard";
 
 const socket = io("http://localhost:3000");
 
@@ -179,6 +180,7 @@ const GameRoom = () => {
   return (
     <div className="flex flex-col justify-center items-center h-full w-full">
       <div className="mt-10 border-1 flex">
+        <LeaderBoard roomId={roomId as string}/>
         <Board canvasRef={canvasRef} />
 
         <Chat userName={profile?.username} userId={profile?.id} roomId={roomId as string }/>

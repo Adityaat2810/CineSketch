@@ -12,9 +12,11 @@ import playerRoutes from './routes/player.js';
 import guesRoutes from './routes/guess.js'
 import moviesRoutes from './routes/movies.js'
 
+import { db } from './lib/db.js';
+
 config({ path: './.env' });
 
-const prisma = new PrismaClient()
+const prisma = db
 const app = express();
 const server = createServer(app);
 

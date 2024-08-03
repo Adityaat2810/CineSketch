@@ -1,8 +1,11 @@
 import express, { Request, Response } from 'express';
-import { verifyPlayer, createPlayer } from '../controller/player.js';
+import { verifyPlayer, createPlayer ,getPlayersOfRoom} from '../controller/player.js';
 
 const router = express.Router();
 router.post('/',createPlayer)
+router.get('/',getPlayersOfRoom
+)
+
 router.post('/verify',verifyPlayer)
 
 

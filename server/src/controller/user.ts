@@ -3,9 +3,9 @@ import { TryCatch } from "../middleware/error.js";
 import { signUpInput } from '@adityaat2810/cine-draw';
 import ErrorHandler from "../lib/errorHandler.js";
 import { compareSync, genSaltSync, hashSync } from "bcrypt-ts";
-import { PrismaClient } from "@prisma/client";
+import { db } from "../lib/db.js";
 import jwt, { Secret, JwtPayload } from 'jsonwebtoken';
-const prisma = new PrismaClient();
+const prisma = db;
 
 export const SECRET_KEY: Secret = process.env.SECRET_KEY as string;
 

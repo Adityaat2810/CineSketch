@@ -1,9 +1,9 @@
-import { PrismaClient } from "@prisma/client";
+import { db } from "../lib/db.js";
 import ErrorHandler from "../lib/errorHandler.js";
 import { TryCatch } from "../middleware/error.js";
 import { CLIENT_RENEG_LIMIT } from "tls";
 
-const prisma = new PrismaClient();
+const prisma = db;
 
 export const CreateRoom = TryCatch(async (req, res, next) => {
   // Zod validation

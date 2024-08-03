@@ -1,11 +1,11 @@
-import { PrismaClient } from "@prisma/client";
+import { db } from "../lib/db.js";
 import { TryCatch } from "../middleware/error.js";
 import ErrorHandler from "../lib/errorHandler.js";
 import jwt, { Secret, JwtPayload } from 'jsonwebtoken';
 
 export const SECRET_KEY: Secret = process.env.SECRET_KEY as string;
 
-const prisma = new PrismaClient()
+const prisma =db
 
 export const createPlayer = TryCatch(
   async (req, res, next) => {
@@ -103,3 +103,28 @@ export const verifyPlayer = TryCatch(
     });
   }
 );
+
+export const getPlayersOfRoom=TryCatch(
+  async(req,res,next)=>{
+    const {roomId }= req.body
+
+    if(!roomId){
+      return next(new ErrorHandler('Bad request ',404))
+    }
+    const players = await prisma.player.findMany({
+      where:{
+        gameRoomId:roomId 
+      }
+    })
+
+    if(!players){
+      return next(new ErrorHandler("Internal Error",500))
+    }
+
+    res.status(200).json({
+      success:true,
+      data:players,
+
+    })
+  }
+)

@@ -1,8 +1,7 @@
-import { PrismaClient } from "@prisma/client";
+import {db} from '../lib/db.js'
 import ErrorHandler from "../lib/errorHandler.js";
 import { TryCatch } from "../middleware/error.js";
 
-const prisma = new PrismaClient()
 
 export const saveGues = TryCatch(
     async (req, res, next) => {
@@ -13,7 +12,7 @@ export const saveGues = TryCatch(
         }
 
 
-        const guess = await prisma.guess.create({
+        const guess = await db.guess.create({
             data: {
                 content,
                 userId,
@@ -35,7 +34,7 @@ export const getGuess = TryCatch(
     async (req, res, next) => {
         const { roomId } = req.params;
 
-        const guesses = await prisma.guess.findMany({
+        const guesses = await db.guess.findMany({
             where: { gameRoomId: roomId },
             orderBy: { createdAt: 'asc' },
         });

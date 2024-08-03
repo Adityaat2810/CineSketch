@@ -1,8 +1,8 @@
 
-import { PrismaClient } from "@prisma/client";
+import {db} from '../lib/db.js'
 import { TryCatch } from "../middleware/error.js";
 import ErrorHandler from "../lib/errorHandler.js";
-const prisma = new PrismaClient();
+const prisma =db
 
 export const createMovie = TryCatch(
   async (req, res, next) => {
