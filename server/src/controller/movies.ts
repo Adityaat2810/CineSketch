@@ -70,8 +70,8 @@ export const updateMovie = TryCatch(
 
     const movie = await prisma.movie.update({
       where: { id },
-      data: { 
-        title, releaseYear, genre, director, difficulty, isActive 
+      data: {
+        title, releaseYear, genre, director, difficulty, isActive
       }
     });
 
@@ -100,6 +100,80 @@ export const deleteMovie = TryCatch(
 
     return res.status(200).json({
       message: 'Movie deleted successfully',
+      success: true
+    });
+  }
+);
+
+
+export const assignRandomMoviesToRoom = TryCatch(
+  async (req, res, next) => {
+    const { roomId } = req.params;
+
+    // Check if the room exists
+    const room = await prisma.gameRoom.findUnique({
+      where: { id: roomId }
+    });
+
+    if (!room) {
+      return next(new ErrorHandler('Room not found', 404));
+    }
+
+    const activeMovies = await prisma.movie.findMany({
+      where: { isActive: true },
+      select: { id: true }
+    });
+
+    if (activeMovies.length < 5) {
+      return next(new ErrorHandler('Not enough active movies in the database', 400));
+    }
+
+    const existingAssignments = await prisma.gameMovie.findMany({
+      where: {
+        gameRoomId: roomId,
+      },
+      select: {
+        movieId: true
+      }
+     });
+
+     
+     if(existingAssignments.length >= 5 ){
+      return next(new ErrorHandler('Already movies assigned in this room',400))
+     }
+
+
+    // Shuffle the array to get random movies
+    const shuffledMovies = activeMovies.sort(() => 0.5 - Math.random());
+
+    // Get the first 5 movies from the shuffled array
+    const randomMovieIds = shuffledMovies.slice(0, 5).map(movie => movie.id);
+
+    // Fetch the details of these movies
+    const randomMovies = await prisma.movie.findMany({
+      where: { id: { in: randomMovieIds } },
+      select: {
+        id: true,
+        title: true
+      }
+    });
+
+
+
+    // Create GameMovie entries for these movies
+    const gameMovies = await prisma.gameMovie.createMany({
+      data: randomMovies.map(movie => ({
+        movieId: movie.id,
+        gameRoomId: roomId
+      })),
+      skipDuplicates: true
+    });
+
+    return res.status(200).json({
+      data: {
+        assignedMovies: randomMovies,
+        count: gameMovies.count
+      },
       success: true
     });
   }

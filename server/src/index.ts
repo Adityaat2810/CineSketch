@@ -35,6 +35,7 @@ app.get('/', (req, res) => {
 // Using error middleware
 app.use(errorMiddleware);
 
+
 // CORS configuration for socket.io
 const io = new Server(server, {
   cors: {
