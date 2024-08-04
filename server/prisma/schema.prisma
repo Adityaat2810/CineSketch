@@ -19,6 +19,9 @@ model User {
   gameRooms    GameRoom[] @relation("OwnedRooms")
   joinedRooms  Player[]
   guesses      Guess[]
+  sessionGuess SessionGuess[]
+
+  GameSession GameSession[] @relation("SessionDrawer")
 }
 
 enum StatusType {
@@ -41,6 +44,7 @@ model GameRoom {
 
 
   @@index([ownerId])
+  GameSession GameSession[]
 }
 
 model Player {
@@ -52,6 +56,7 @@ model Player {
   joinedAt  DateTime   @default(now())
 
   @@unique([userId, gameRoomId])
+  PlayerSession PlayerSession[]
 }
 
 model Guess {
@@ -78,6 +83,8 @@ model Movie {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   usedInGames GameMovie[]
+
+  GameSession GameSession[]
 }
 
 model GameMovie {
@@ -90,6 +97,56 @@ model GameMovie {
   wasGuessed Boolean @default(false)
 
   @@unique([movieId, gameRoomId])
+}
+
+
+model GameSession {
+  id            String    @id @default(uuid())
+  gameRoomId    String
+  gameRoom      GameRoom  @relation(fields: [gameRoomId], references: [id], onDelete: Cascade)
+  currentMovieId String?
+  currentMovie  Movie?    @relation(fields: [currentMovieId], references: [id])
+  drawerId      String
+  drawer        User      @relation("SessionDrawer", fields: [drawerId], references: [id])
+  startTime     DateTime  @default(now())
+  endTime       DateTime?
+  status        SessionStatus @default(IN_PROGRESS)
+  roundNumber   Int
+  sessionGuess    SessionGuess[]
+  playerSessions PlayerSession[]
+
+  @@index([gameRoomId])
+  @@index([drawerId])
+}
+
+model SessionGuess{
+  id  String  @id @default(uuid())
+  content String
+  userId  String
+  user  User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionId String
+  session GameSession @relation(fields: [sessionId],references: [id],onDelete: Cascade)
+
+  @@index([userId])
+  @@index([sessionId])
+
+
+}
+
+model PlayerSession {
+  id            String    @id @default(uuid())
+  playerId      String
+  player        Player    @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  gameSessionId String
+  gameSession   GameSession @relation(fields: [gameSessionId], references: [id], onDelete: Cascade)
+  scoreEarned   Int       @default(0)
+
+  @@unique([playerId, gameSessionId])
+}
+
+enum SessionStatus {
+  IN_PROGRESS
+  COMPLETED
 }
 
 enum Difficulty {

@@ -9,6 +9,7 @@ import axios from "axios";
 import Chat from "@/components/game/chat";
 import getProfile from "@/lib/getProfile";
 import { LeaderBoard } from "@/components/game/leaderBoard";
+import StartGame from "@/components/game/start-game";
 
 const socket = io("http://localhost:3000");
 
@@ -197,6 +198,13 @@ const GameRoom = () => {
         </div>
         <div className="px-4">
           <ColorPicker color={color} setColor={setColor} />
+        </div>
+
+        <div>
+          <StartGame 
+            userId={profile.id}
+            gameRoomId={roomId as string}
+          />
         </div>
       </div>
     </div>
