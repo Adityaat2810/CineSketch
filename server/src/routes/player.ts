@@ -3,7 +3,7 @@ import { verifyPlayer, createPlayer ,getPlayersOfRoom} from '../controller/playe
 
 const router = express.Router();
 router.post('/',createPlayer)
-router.get('/',getPlayersOfRoom
+router.post('/get',getPlayersOfRoom
 )
 
 router.post('/verify',verifyPlayer)

@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node dist/index.js",
+    "seed":"node dist/lib/seed/seed.js",
     "build": "tsc",
     "watch": "tsc -w",
     "dev": "concurrently \"tsc -w\" \"nodemon dist/index.js\""

@@ -114,6 +114,8 @@ export const getPlayersOfRoom=TryCatch(
     const players = await prisma.player.findMany({
       where:{
         gameRoomId:roomId 
+      },include:{
+         user:true
       }
     })
 
