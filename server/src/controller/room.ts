@@ -25,6 +25,31 @@ export const CreateRoom = TryCatch(async (req, res, next) => {
   });
 });
 
+export const getRoomById = TryCatch(
+  async(req,res,next)=>{
+    console.log('fetching room')
+    const { roomId }= req.body;
+    if(!roomId){
+      return next( new ErrorHandler('Bad Request !',400))
+    }
+
+    const room= await db.gameRoom.findUnique({
+      where:{
+        id:roomId as string
+      },
+      include:{
+        players:true
+      }
+    })
+
+    return res.status(200).json({
+      data:room,
+      success:true
+    })
+
+  }
+)
+
 export const getUserRoom = TryCatch(async (req, res, next) => {
   const { userId } = req.query; // Changed to req.query
   console.log(req.query);

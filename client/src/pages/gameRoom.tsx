@@ -202,7 +202,7 @@ const GameRoom = () => {
 
         <div>
           <StartGame 
-            userId={profile.id}
+            userId={profile?.id}
             gameRoomId={roomId as string}
           />
         </div>
