@@ -15,7 +15,7 @@ const App = () => {
 
   return (
     <Suspense fallback={<Loader />}>
-      {!noHeaderRoutes.includes(location.pathname) && <Header />}
+      {!noHeaderRoutes.includes(location.pathname) && <div ><Header/></div> }
       <Routes>
         <Route element={<ProtectedRoute />}>
           <Route path='/' element={<Home />} />

@@ -27,8 +27,10 @@ function Signup() {
         transition={{ duration: 0.8, delay: 0.2 }}
         className="lg:w-1/2 bg-white text-black p-10 flex flex-col justify-center"
       >
-        <div className="max-w-md mx-auto w-full">
-          <h2 className="text-3xl font-bold mb-6 ml-8">Join the Show</h2>
+        <div className="max-w-md mx-auto w-full 
+       border border-purple-700
+        rounded-lg
+        px-3 py-10">
           <SignupForm />
           <div className="mt-6 text-center">
             Already have an account?{" "}

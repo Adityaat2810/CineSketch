@@ -43,9 +43,9 @@ export const SignupForm = () => {
 
  
   return (
-    <div className="border border-zinc-500
-     rounded-lg
-     px-3 py-20">
+    <div >
+       <h2 className="text-3xl font-bold mb-6 ml-8">Join the Show</h2>
+
        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-w-sm mx-auto">
       <motion.div 
         whileHover={{ scale: 1.02 }} 
