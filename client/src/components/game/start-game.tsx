@@ -13,6 +13,11 @@ function StartGame({
   const [currentPlayer, setCurrentPlayer] = useState<any>(null);
   const [isOwner, setIsOwner] = useState(false);
 
+  const handleStartGame= async()=>{
+    // logic to start a game goes here
+    alert('game started ')
+  }
+
   useEffect(() => {
     const handleJoinRoom = async () => {
       try {
@@ -42,7 +47,7 @@ function StartGame({
       {isOwner ? (
         <div>
           {room && gameRoomId ? (
-            <Button>
+            <Button onClick={handleStartGame}>
               Start Game
             </Button>
           ) : (
@@ -53,7 +58,7 @@ function StartGame({
         </div>
       ) : (
         <div>
-          Not owner
+         
         </div>
       )}
     </div>
