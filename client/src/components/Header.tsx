@@ -3,7 +3,7 @@ import { Button } from "./ui/button"
 import { Avatar } from "./utils/avatar"
 import { Search } from "./utils/search"
 import { motion } from "framer-motion";
-import { FiMenu, FiSun, FiMoon } from 'react-icons/fi';
+import { FiMenu, } from 'react-icons/fi';
 
 function Header() {
 

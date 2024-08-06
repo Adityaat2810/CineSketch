@@ -10,6 +10,7 @@ import Chat from "@/components/game/chat";
 import getProfile from "@/lib/getProfile";
 import { LeaderBoard } from "@/components/game/leaderBoard";
 import StartGame from "@/components/game/start-game";
+import { motion } from "framer-motion";
 
 const socket = io("http://localhost:3000");
 
@@ -175,7 +176,18 @@ const GameRoom = () => {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen bg-gray-100 dark:bg-gray-900">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="text-2xl font-bold text-gray-800 dark:text-white"
+        >
+          Loading...
+        </motion.div>
+      </div>
+    );
   }
 
   return (

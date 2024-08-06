@@ -105,10 +105,18 @@ export const deleteMovie = TryCatch(
   }
 );
 
-
 export const assignRandomMoviesToRoom = TryCatch(
   async (req, res, next) => {
     const { roomId } = req.params;
+    const { noOfMovies } = req.body;
+
+    // Check if noOfMovies is 0 or not provided
+    if (!noOfMovies || noOfMovies <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot assign movies. Number of movies must be greater than 0."
+      });
+    }
 
     // Check if the room exists
     const room = await prisma.gameRoom.findUnique({
@@ -124,7 +132,7 @@ export const assignRandomMoviesToRoom = TryCatch(
       select: { id: true }
     });
 
-    if (activeMovies.length < 5) {
+    if (activeMovies.length < noOfMovies) {
       return next(new ErrorHandler('Not enough active movies in the database', 400));
     }
 
@@ -135,19 +143,17 @@ export const assignRandomMoviesToRoom = TryCatch(
       select: {
         movieId: true
       }
-     });
+    });
 
-     
-     if(existingAssignments.length >= 5 ){
-      return next(new ErrorHandler('Already movies assigned in this room',400))
-     }
-
+    if (existingAssignments.length >= noOfMovies) {
+      return next(new ErrorHandler('Already movies assigned in this room', 400));
+    }
 
     // Shuffle the array to get random movies
     const shuffledMovies = activeMovies.sort(() => 0.5 - Math.random());
 
-    // Get the first 5 movies from the shuffled array
-    const randomMovieIds = shuffledMovies.slice(0, 5).map(movie => movie.id);
+    // Get the first noOfMovies from the shuffled array
+    const randomMovieIds = shuffledMovies.slice(0, noOfMovies).map(movie => movie.id);
 
     // Fetch the details of these movies
     const randomMovies = await prisma.movie.findMany({
@@ -157,8 +163,6 @@ export const assignRandomMoviesToRoom = TryCatch(
         title: true
       }
     });
-
-
 
     // Create GameMovie entries for these movies
     const gameMovies = await prisma.gameMovie.createMany({

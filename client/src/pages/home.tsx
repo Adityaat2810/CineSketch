@@ -96,7 +96,7 @@ const Home = () => {
    // ... (keep your existing state and useEffect logic)
 
    return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-500 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-300 to-zinc-100 p-8">
       <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
