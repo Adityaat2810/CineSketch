@@ -190,37 +190,39 @@ const GameRoom = () => {
     );
   }
 
-  return (
-    <div className="flex flex-col justify-center items-center h-full w-full">
-      <div className="mt-10 border-1 flex">
-        <LeaderBoard roomId={roomId as string}/>
-        <Board canvasRef={canvasRef} />
+    return (
+      <div className="flex flex-col  bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-indigo-900 p-4">
+        <div className="flex-grow flex flex-col lg:flex-row gap-4">
+          <div className="lg:w-1/5 flex flex-col">
+            <LeaderBoard roomId={roomId as string}/>
+          </div>
+          
+          <div className="lg:w-3/5 flex flex-col">
+            <div className="flex-grow bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
+              <Board canvasRef={canvasRef} />
 
-        <Chat userName={profile?.username} userId={profile?.id} roomId={roomId as string }/>
+              <div className="mt-10 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg flex justify-center items-center space-x-4">
+              <button onClick={clearCanvas} className="hover:bg-gray-200 dark:hover:bg-gray-700 p-2 rounded-full transition">
+                <Eraser className="h-6 w-6 text-zinc-600 dark:text-zinc-100" />
+              </button>
+              <SizePicker setSize={setSize} size={size} />
+              <ColorPicker color={color} setColor={setColor} />
+              <StartGame 
+                userId={profile?.id}
+                gameRoomId={roomId as string}
+              />
+            </div>
+            </div>
+            
+          </div>
+          
+          <div className="lg:w-1/5 flex flex-col">
+            <Chat userName={profile?.username} userId={profile?.id} roomId={roomId as string} />
+          </div>
+        </div>
       </div>
-
-      <div className="flex justify-center p-2">
-        <div className="px-4">
-          <button onClick={clearCanvas} className="h-9 w-9 text-zinc-500">
-            <Eraser className="h-9 w-9 text-zinc-600 dark:text-zinc-100 hover:text-black dark:hover:text-white transition" />
-          </button>
-        </div>
-        <div className="px-2">
-          <SizePicker setSize={setSize} size={size} />
-        </div>
-        <div className="px-4">
-          <ColorPicker color={color} setColor={setColor} />
-        </div>
-
-        <div>
-          <StartGame 
-            userId={profile?.id}
-            gameRoomId={roomId as string}
-          />
-        </div>
-      </div>
-    </div>
-  );
+    );
+  
 };
 
 export default GameRoom;
