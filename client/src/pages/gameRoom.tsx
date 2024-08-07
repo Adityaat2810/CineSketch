@@ -11,17 +11,44 @@ import getProfile from "@/lib/getProfile";
 import { LeaderBoard } from "@/components/game/leaderBoard";
 import StartGame from "@/components/game/start-game";
 import { motion } from "framer-motion";
+import GameStartNotification from "@/components/utils/game-starter-notification";
 
 const socket = io("http://localhost:3000");
 
 const GameRoom = () => {
   const { roomId } = useParams<{ roomId: string }>();
+  const [showGameStartNotification, setShowGameStartNotification] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [color, setColor] = useState("#aabbcc");
   const [size, setSize] = useState(5);
   const [profile, setProfile] = useState<any>(null);
+  const [sessions, setSessions] = useState<any>(null);
+
   const navigate = useNavigate();
+
+  useEffect(()=>{
+    const fetchSessions = async()=>{
+      const sessions = await axios.get(`http://localhost:3000/api/v1/session/${roomId}`)
+      console.log(sessions?.data)
+      if(!sessions){
+        console.log('game not started yet ')
+      }
+
+
+      if(sessions){
+        setSessions(sessions.data.data)
+        console.log('session are ', sessions.data.data)
+
+        // initiate the game play 
+  
+
+      }
+    }
+
+    fetchSessions()
+    
+  },[])
 
    useEffect(() => {
     const fetchProfile = async () => {
@@ -146,6 +173,11 @@ const GameRoom = () => {
       };
     });
 
+    socket.on('startGameForUser', () => {
+      console.log('Game started notification received');
+      setShowGameStartNotification(true);
+    });
+
     socket.on("clearCanvas", () => {
       const ctx = canvas?.getContext("2d");
       if (ctx && canvas) {
@@ -174,6 +206,10 @@ const GameRoom = () => {
       socket.emit("clearCanvas", roomId);
     }
   };
+  
+  const handleCloseNotification = () => {
+    setShowGameStartNotification(false);
+  };
 
   if (isLoading) {
     return (
@@ -192,7 +228,12 @@ const GameRoom = () => {
 
     return (
       <div className="flex flex-col  bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-indigo-900 p-4">
+      <GameStartNotification 
+        show={showGameStartNotification} 
+        onClose={handleCloseNotification} 
+      />
         <div className="flex-grow flex flex-col lg:flex-row gap-4">
+      
           <div className="lg:w-1/5 flex flex-col">
             <LeaderBoard roomId={roomId as string}/>
           </div>

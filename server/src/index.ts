@@ -6,11 +6,13 @@ import { errorMiddleware } from './middleware/error.js';
 import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
 
+// importing routs
 import userRoutes from './routes/user.js';
 import roomRoutes from './routes/room.js';
 import playerRoutes from './routes/player.js';
 import guesRoutes from './routes/guess.js'
 import moviesRoutes from './routes/movies.js'
+import sessionRoute from './routes/session.js'
 
 import { db } from './lib/db.js';
 
@@ -22,13 +24,13 @@ const server = createServer(app);
 
 app.use(cors());
 app.use(express.json());
+
 app.use('/api/v1/user', userRoutes);
 app.use('/api/v1/room', roomRoutes);
 app.use('/api/v1/player', playerRoutes);
 app.use('/api/v1/guess', guesRoutes);
 app.use('/api/v1/movies', moviesRoutes);
-
-
+app.use('/api/v1/session',sessionRoute)
 
 app.get('/', (req, res) => {
   res.send('Hello world!');
@@ -98,6 +100,7 @@ io.on('connection', (socket) => {
         },
       });
 
+
       // Emit the message to all clients in the room
       // Change this line to emit the saved guess object
       io.to(roomId).emit('chatMessage', savedGuess);
@@ -105,6 +108,12 @@ io.on('connection', (socket) => {
       console.error('Error saving message:', error);
     }
   });
+
+  socket.on('gameStarted',(gameRoomId)=>{
+    console.log('game started on room ',gameRoomId)
+    socket.to(gameRoomId).emit('startGameForUser')
+  })
+
   socket.on('clearCanvas', (roomId) => {
     // Broadcast the clearCanvas event to all other clients in the same room
     socket.to(roomId).emit('clearCanvas');
