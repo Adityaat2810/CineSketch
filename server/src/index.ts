@@ -6,7 +6,7 @@ import { errorMiddleware } from './middleware/error.js';
 import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
 
-// importing routs
+// importing routes
 import userRoutes from './routes/user.js';
 import roomRoutes from './routes/room.js';
 import playerRoutes from './routes/player.js';
@@ -30,7 +30,7 @@ app.use('/api/v1/room', roomRoutes);
 app.use('/api/v1/player', playerRoutes);
 app.use('/api/v1/guess', guesRoutes);
 app.use('/api/v1/movies', moviesRoutes);
-app.use('/api/v1/session',sessionRoute)
+app.use('/api/v1/session', sessionRoute)
 
 app.get('/', (req, res) => {
   res.send('Hello world!');
@@ -38,7 +38,6 @@ app.get('/', (req, res) => {
 
 // Using error middleware
 app.use(errorMiddleware);
-
 
 // CORS configuration for socket.io
 const io = new Server(server, {
@@ -63,7 +62,6 @@ io.on('connection', (socket) => {
   });
 
   socket.on('canvasImage', ({ roomId, canvasData }) => {
-    // Broadcast the data to all other clients in the same room
     socket.to(roomId).emit('canvasImage', canvasData);
   });
 
@@ -71,7 +69,6 @@ io.on('connection', (socket) => {
     const { roomId, message, userId } = data;
 
     try {
-      // Validate userId
       const user = await prisma.user.findUnique({
         where: { id: userId },
       });
@@ -81,7 +78,6 @@ io.on('connection', (socket) => {
         return;
       }
 
-      // Validate gameRoomId
       const gameRoom = await prisma.gameRoom.findUnique({
         where: { id: roomId },
       });
@@ -91,7 +87,6 @@ io.on('connection', (socket) => {
         return;
       }
 
-      // Save the message to the database
       const savedGuess = await prisma.guess.create({
         data: {
           content: message,
@@ -100,23 +95,79 @@ io.on('connection', (socket) => {
         },
       });
 
-
-      // Emit the message to all clients in the room
-      // Change this line to emit the saved guess object
       io.to(roomId).emit('chatMessage', savedGuess);
     } catch (error) {
       console.error('Error saving message:', error);
     }
   });
 
-  socket.on('gameStarted',(gameRoomId)=>{
-    console.log('game started on room ',gameRoomId)
-    socket.to(gameRoomId).emit('startGameForUser')
-  })
+  socket.on('gameStarted', ({ roomId, sessionId }) => {
+    console.log('game started on room ', roomId);
+    io.to(roomId).emit('gameStarted', { roomId, sessionId });
+  });
 
   socket.on('clearCanvas', (roomId) => {
-    // Broadcast the clearCanvas event to all other clients in the same room
     socket.to(roomId).emit('clearCanvas');
+  });
+
+  // New events for game play
+  socket.on('startRound', async ({ roomId, sessionId }) => {
+    try {
+      const session = await prisma.gameSession.findUnique({
+        where: { id: sessionId },
+        include: { currentMovie: true, drawer: true },
+      });
+
+      if (session) {
+        io.to(roomId).emit('roundStarted', {
+          drawerId: session.drawerId,
+          movieTitle: session.currentMovie.title,
+          roundNumber: session.roundNumber,
+        });
+      }
+    } catch (error) {
+      console.error('Error starting round:', error);
+    }
+  });
+
+  socket.on('endRound', async ({ roomId, sessionId }) => {
+    try {
+      const updatedSession = await prisma.gameSession.update({
+        where: { id: sessionId },
+        data: { roundNumber: { increment: 1 } },
+        include: { currentMovie: true, drawer: true },
+      });
+
+      io.to(roomId).emit('roundEnded', {
+        nextDrawerId: updatedSession.drawerId,
+        roundNumber: updatedSession.roundNumber,
+      });
+    } catch (error) {
+      console.error('Error ending round:', error);
+    }
+  });
+
+  socket.on('guess', async ({ roomId, sessionId, userId, guess }) => {
+    try {
+      const session = await prisma.gameSession.findUnique({
+        where: { id: sessionId },
+        include: { currentMovie: true },
+      });
+
+      //@ts-ignore
+      if (session && session.currentMovie.title.toLowerCase() === guess.toLowerCase()) {
+        const updatedPlayerSession = await prisma.playerSession.updateMany({
+          where: { gameSessionId: sessionId, player: { userId } },
+          data: { scoreEarned: { increment: 10 } }, // Adjust score as needed
+        });
+
+        io.to(roomId).emit('correctGuess', { userId, guess });
+      } else {
+        io.to(roomId).emit('incorrectGuess', { userId, guess });
+      }
+    } catch (error) {
+      console.error('Error processing guess:', error);
+    }
   });
 
   socket.on('disconnect', () => {

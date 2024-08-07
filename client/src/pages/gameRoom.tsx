@@ -12,6 +12,7 @@ import { LeaderBoard } from "@/components/game/leaderBoard";
 import StartGame from "@/components/game/start-game";
 import { motion } from "framer-motion";
 import GameStartNotification from "@/components/utils/game-starter-notification";
+import { SessionPlay } from "@/components/utils/session-play";
 
 const socket = io("http://localhost:3000");
 
@@ -24,31 +25,34 @@ const GameRoom = () => {
   const [size, setSize] = useState(5);
   const [profile, setProfile] = useState<any>(null);
   const [sessions, setSessions] = useState<any>(null);
+  const [currentSession ,setCurrentSession] = useState<any>(null)
+  const [letPlay, setLetPlay]= useState(false)
+
 
   const navigate = useNavigate();
 
   useEffect(()=>{
-    const fetchSessions = async()=>{
-      const sessions = await axios.get(`http://localhost:3000/api/v1/session/${roomId}`)
-      console.log(sessions?.data)
-      if(!sessions){
-        console.log('game not started yet ')
+    const fetchSessions = async () => {
+      const sessionsResponse = await axios.get(`http://localhost:3000/api/v1/session/${roomId}`);
+      if (sessionsResponse.data.data && sessionsResponse.data.data.length > 0) {
+        setSessions(sessionsResponse.data.data);
+        setCurrentSession(sessionsResponse.data.data[0]);
+        if (sessionsResponse.data.data[0].status === 'IN_PROGRESS') {
+          console.log('first session ',sessionsResponse.data.data[0])
+         // initiateGameplay(sessionsResponse.data.data[0]);
+         setLetPlay(true)
+
+         // lets make first session happen 
+        }
       }
-
-
-      if(sessions){
-        setSessions(sessions.data.data)
-        console.log('session are ', sessions.data.data)
-
-        // initiate the game play 
-  
-
-      }
-    }
+    };
 
     fetchSessions()
     
+    
   },[])
+
+
 
    useEffect(() => {
     const fetchProfile = async () => {
@@ -173,6 +177,8 @@ const GameRoom = () => {
       };
     });
 
+
+
     socket.on('startGameForUser', () => {
       console.log('Game started notification received');
       setShowGameStartNotification(true);
@@ -226,43 +232,45 @@ const GameRoom = () => {
     );
   }
 
-    return (
-      <div className="flex flex-col  bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-indigo-900 p-4">
-      <GameStartNotification 
-        show={showGameStartNotification} 
-        onClose={handleCloseNotification} 
-      />
-        <div className="flex-grow flex flex-col lg:flex-row gap-4">
-      
-          <div className="lg:w-1/5 flex flex-col">
-            <LeaderBoard roomId={roomId as string}/>
-          </div>
-          
-          <div className="lg:w-3/5 flex flex-col">
-            <div className="flex-grow bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
-              <Board canvasRef={canvasRef} />
+  return (
+    <div className="flex flex-col  bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-indigo-900 p-4">
 
-              <div className="mt-10 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg flex justify-center items-center space-x-4">
-              <button onClick={clearCanvas} className="hover:bg-gray-200 dark:hover:bg-gray-700 p-2 rounded-full transition">
-                <Eraser className="h-6 w-6 text-zinc-600 dark:text-zinc-100" />
-              </button>
-              <SizePicker setSize={setSize} size={size} />
-              <ColorPicker color={color} setColor={setColor} />
-              <StartGame 
-                userId={profile?.id}
-                gameRoomId={roomId as string}
-              />
-            </div>
-            </div>
-            
-          </div>
-          
-          <div className="lg:w-1/5 flex flex-col">
-            <Chat userName={profile?.username} userId={profile?.id} roomId={roomId as string} />
-          </div>
+      <div className="flex-grow flex flex-col lg:flex-row gap-4">
+        <div className="lg:w-1/5 flex flex-col">
+          <LeaderBoard roomId={roomId as string}/>
+          <SessionPlay currentUserId={profile?.id} session={currentSession}/>
+
         </div>
+
+        <div className="lg:w-3/5 flex flex-col">
+          {/* this id canvas  */}
+          <div className="flex-grow bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
+            <Board canvasRef={canvasRef} />
+
+            <div className="mt-10 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg flex justify-center items-center space-x-4">
+            <button onClick={clearCanvas} className="hover:bg-gray-200 dark:hover:bg-gray-700 p-2 rounded-full transition">
+              <Eraser className="h-6 w-6 text-zinc-600 dark:text-zinc-100" />
+            </button>
+            <SizePicker setSize={setSize} size={size} />
+            <ColorPicker color={color} setColor={setColor} />
+            <StartGame 
+              userId={profile?.id}
+              gameRoomId={roomId as string}
+            />
+          </div>
+          </div>
+
+        </div>
+
+        <div className="lg:w-1/5 flex flex-col">
+          <Chat userName={profile?.username} userId={profile?.id} roomId={roomId as string} />
+
+        </div>
+
+
       </div>
-    );
+    </div>
+  );
   
 };
 
