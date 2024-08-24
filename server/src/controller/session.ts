@@ -95,6 +95,9 @@ export const getSessionOfRoom = TryCatch(
       where:{
         gameRoomId:roomId
       },
+      include:{
+        currentMovie:true
+      }
     
     })
 

@@ -24,37 +24,51 @@ const GameRoom = () => {
   const [color, setColor] = useState("#aabbcc");
   const [size, setSize] = useState(5);
   const [profile, setProfile] = useState<any>(null);
+  const [isDrawer, setIsDrawer] = useState(false);
+  const [gameStarted, setGameStarted] = useState(false);
   const [sessions, setSessions] = useState<any>(null);
-  const [currentSession ,setCurrentSession] = useState<any>(null)
-  const [letPlay, setLetPlay]= useState(false)
+  const [currentSession, setCurrentSession] = useState<any>(null)
+  const [letPlay, setLetPlay] = useState(false)
 
 
   const navigate = useNavigate();
 
-  useEffect(()=>{
+  // Add this useEffect for game state changes
+  useEffect(() => {
+    socket.on('gameState', ({ drawer, started }) => {
+      setIsDrawer(drawer === profile?.id);
+      setGameStarted(started);
+    });
+
+    return () => {
+      socket.off('gameState');
+    };
+  }, [profile]);
+
+  useEffect(() => {
     const fetchSessions = async () => {
       const sessionsResponse = await axios.get(`http://localhost:3000/api/v1/session/${roomId}`);
       if (sessionsResponse.data.data && sessionsResponse.data.data.length > 0) {
         setSessions(sessionsResponse.data.data);
         setCurrentSession(sessionsResponse.data.data[0]);
         if (sessionsResponse.data.data[0].status === 'IN_PROGRESS') {
-          console.log('first session ',sessionsResponse.data.data[0])
-         // initiateGameplay(sessionsResponse.data.data[0]);
-         setLetPlay(true)
-
-         // lets make first session happen 
+          console.log('first session ', sessionsResponse.data.data[0])
+          // initiateGameplay(sessionsResponse.data.data[0]);
+          setLetPlay(true)
+          //one 
+          // lets make first session happen 
         }
       }
     };
 
     fetchSessions()
-    
-    
-  },[])
+
+
+  }, [])
 
 
 
-   useEffect(() => {
+  useEffect(() => {
     const fetchProfile = async () => {
       try {
         const token = localStorage.getItem('authentication-token');
@@ -212,7 +226,7 @@ const GameRoom = () => {
       socket.emit("clearCanvas", roomId);
     }
   };
-  
+
   const handleCloseNotification = () => {
     setShowGameStartNotification(false);
   };
@@ -237,9 +251,13 @@ const GameRoom = () => {
 
       <div className="flex-grow flex flex-col lg:flex-row gap-4">
         <div className="lg:w-1/5 flex flex-col">
-          <LeaderBoard roomId={roomId as string}/>
-          <SessionPlay currentUserId={profile?.id} session={currentSession}/>
-
+          <LeaderBoard roomId={roomId as string} />
+          <SessionPlay
+            currentUserId={profile?.id}
+            session={currentSession}
+            socket={socket}
+            roomId={roomId as string}
+          />
         </div>
 
         <div className="lg:w-3/5 flex flex-col">
@@ -248,16 +266,16 @@ const GameRoom = () => {
             <Board canvasRef={canvasRef} />
 
             <div className="mt-10 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg flex justify-center items-center space-x-4">
-            <button onClick={clearCanvas} className="hover:bg-gray-200 dark:hover:bg-gray-700 p-2 rounded-full transition">
-              <Eraser className="h-6 w-6 text-zinc-600 dark:text-zinc-100" />
-            </button>
-            <SizePicker setSize={setSize} size={size} />
-            <ColorPicker color={color} setColor={setColor} />
-            <StartGame 
-              userId={profile?.id}
-              gameRoomId={roomId as string}
-            />
-          </div>
+              <button onClick={clearCanvas} className="hover:bg-gray-200 dark:hover:bg-gray-700 p-2 rounded-full transition">
+                <Eraser className="h-6 w-6 text-zinc-600 dark:text-zinc-100" />
+              </button>
+              <SizePicker setSize={setSize} size={size} />
+              <ColorPicker color={color} setColor={setColor} />
+              <StartGame
+                userId={profile?.id}
+                gameRoomId={roomId as string}
+              />
+            </div>
           </div>
 
         </div>
@@ -271,7 +289,7 @@ const GameRoom = () => {
       </div>
     </div>
   );
-  
+
 };
 
 export default GameRoom;

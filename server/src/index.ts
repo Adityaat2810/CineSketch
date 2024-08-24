@@ -121,7 +121,7 @@ io.on('connection', (socket) => {
       if (session) {
         io.to(roomId).emit('roundStarted', {
           drawerId: session.drawerId,
-          movieTitle: session.currentMovie.title,
+          movieTitle: session?.currentMovie?.title,
           roundNumber: session.roundNumber,
         });
       }
@@ -167,6 +167,57 @@ io.on('connection', (socket) => {
       }
     } catch (error) {
       console.error('Error processing guess:', error);
+    }
+  });
+
+
+  socket.on('makeGuess', async ({ roomId, sessionId, userId, guess,message }) => {
+    console.log('i ma here ')
+    console.log(message)
+  });
+  
+  socket.on('startGame', async ({ roomId }) => {
+    try {
+      const gameRoom = await prisma.gameRoom.findUnique({
+        where: { id: roomId },
+        include: { players: true },
+      });
+  
+      if (!gameRoom) {
+        console.error('Invalid game room');
+        return;
+      }
+  
+      const randomMovie = await prisma.movie.findFirst({
+        orderBy: { id: 'asc' },
+        skip: Math.floor(Math.random() * await prisma.movie.count()),
+      });
+  
+      if (!randomMovie) {
+        console.error('No movies available');
+        return;
+      }
+  
+      const randomDrawer = gameRoom.players[Math.floor(Math.random() * gameRoom.players.length)];
+  
+      const newSession = await prisma.gameSession.create({
+        data: {
+          status: 'IN_PROGRESS',
+          gameRoomId: roomId,
+          drawerId: randomDrawer.id,
+          currentMovieId: randomMovie.id,
+          roundNumber: 1,
+        },
+      });
+  
+      io.to(roomId).emit('gameState', { 
+        drawer: randomDrawer.id, 
+        started: true, 
+        word: randomMovie.title,
+        sessionId: newSession.id
+      });
+    } catch (error) {
+      console.error('Error starting game:', error);
     }
   });
 
